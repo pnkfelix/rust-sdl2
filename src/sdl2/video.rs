@@ -288,6 +288,16 @@ pub enum WindowPos {
     Positioned(int)
 }
 
+trait ToWindowPos { fn to_window_pos(self) -> WindowPos; }
+
+impl ToWindowPos for WindowPos {
+    fn to_window_pos(self) -> WindowPos { self }
+}
+
+impl ToWindowPos for int {
+    fn to_window_pos(self) -> WindowPos { Positioned(self) }
+}
+
 fn unwrap_windowpos (pos: WindowPos) -> ll::SDL_WindowPos {
     match pos {
         PosUndefined => ll::SDL_WINDOWPOS_UNDEFINED,
@@ -344,8 +354,9 @@ impl Drop for Window {
 }
 
 impl Window {
-    pub fn new(title: &str, x: WindowPos, y: WindowPos, width: int, height: int, window_flags: WindowFlags) -> SdlResult<Window> {
+    pub fn new<X:ToWindowPos,Y:ToWindowPos>(title: &str, x: X, y: Y, width: int, height: int, window_flags: WindowFlags) -> SdlResult<Window> {
         unsafe {
+            let (x,y) = (x.to_window_pos(), y.to_window_pos());
             let raw = title.with_c_str(|buff| {
                 ll::SDL_CreateWindow(
                     buff,

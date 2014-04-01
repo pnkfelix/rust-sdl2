@@ -588,8 +588,8 @@ impl<S> Renderer<S> {
 pub struct TextureQuery {
     pub format: pixels::PixelFormatFlag,
     pub access: TextureAccess,
-    pub width: int,
-    pub height: int
+    pub width: i32,
+    pub height: i32
 }
 
 #[deriving(PartialEq)] #[allow(raw_pointer_deriving)]
@@ -621,8 +621,8 @@ impl Texture {
             Ok(TextureQuery {
                format: FromPrimitive::from_i64(format as i64).unwrap(),
                access: FromPrimitive::from_i64(access as i64).unwrap(),
-               width: width as int,
-               height: height as int
+               width: width,
+               height: height
             })
         } else {
             Err(get_error())

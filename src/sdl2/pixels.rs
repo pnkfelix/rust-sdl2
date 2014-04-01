@@ -134,7 +134,7 @@ impl rand::Rand for Color {
 
 #[deriving(PartialEq)] #[allow(raw_pointer_deriving)]
 pub struct PixelFormat {
-    raw: *const ll::SDL_PixelFormat
+    pub raw: *const ll::SDL_PixelFormat
 }
 
 impl_raw_accessors!(PixelFormat, *const ll::SDL_PixelFormat)

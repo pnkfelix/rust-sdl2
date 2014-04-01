@@ -5,14 +5,17 @@ CARGODIR ?= ./target
 
 BINDIR = $(OUTDIR)/bin
 LIBDIR = $(OUTDIR)/lib
-TMPDIR = $(OUTDIR)/tmp
+BUILD_TMPDIR = $(OUTDIR)/tmp
+
+SDL_LIBDIR = $(shell sdl2-config --prefix)/lib
+# $(info SDL_LIBDIR,$(SDL_LIBDIR))
 
 RUST_SRC = $(shell find src/. -type f -name '*.rs') \
 	src/sdl2/generated/keycode.rs                   \
 	src/sdl2/generated/scancode.rs
 
 .PHONY: all gen-lib
-all: $(TMPDIR)/libsdl2.dummy
+all: $(BUILD_TMPDIR)/libsdl2.dummy
 
 UNAME=$(shell uname)
 
@@ -27,6 +30,8 @@ ifeq ($(UNAME),Darwin)
     endif
   endif
 
+  # $(info UNAME,$(UNAME),SDL_MODE,$(SDL_MODE))
+
   ifeq ($(SDL_MODE),framework)
     RUSTFLAGS+=--cfg mac_framework
   else
@@ -34,24 +39,24 @@ ifeq ($(UNAME),Darwin)
   endif
 endif
 
-$(BINDIR) $(LIBDIR) $(TMPDIR):
+$(BINDIR) $(LIBDIR) $(BUILD_TMPDIR):
 	mkdir -p '$@'
 
-$(TMPDIR)/codegen: $(wildcard src/codegen/*.rs) $(TMPDIR)
-	$(RUSTC) -o '$(TMPDIR)/codegen' src/codegen/main.rs $(RUSTFLAGS)
+$(BUILD_TMPDIR)/codegen: $(wildcard src/codegen/*.rs) $(BUILD_TMPDIR)
+	$(RUSTC) -o '$(BUILD_TMPDIR)/codegen' src/codegen/main.rs $(RUSTFLAGS)
 
-src/sdl2/generated/%.rs: $(TMPDIR)/codegen
-	'$(TMPDIR)/codegen' $(patsubst src/sdl2/generated/%,%,$@) src/sdl2/generated/
+src/sdl2/generated/%.rs: $(BUILD_TMPDIR)/codegen
+	'$(BUILD_TMPDIR)/codegen' $(patsubst src/sdl2/generated/%,%,$@) src/sdl2/generated/
 
-gen-lib: src/sdl2/lib.rs $(RUST_SRC) $(LIBDIR) $(TMPDIR)
+gen-lib: src/sdl2/lib.rs $(RUST_SRC) | $(LIBDIR) $(BUILD_TMPDIR)
 	$(RUSTC) --out-dir '$(LIBDIR)' src/sdl2/lib.rs $(RUSTFLAGS)
 
-$(TMPDIR)/libsdl2.dummy: src/sdl2/lib.rs $(RUST_SRC) $(LIBDIR) $(TMPDIR)
+$(BUILD_TMPDIR)/libsdl2.dummy: src/sdl2/lib.rs $(RUST_SRC) | $(LIBDIR) $(BUILD_TMPDIR)
 	$(RUSTC) --out-dir '$(LIBDIR)' src/sdl2/lib.rs $(RUSTFLAGS)
 	touch $@
 
-compile_demo: src/demo/main.rs src/demo/video.rs $(TMPDIR)/libsdl2.dummy $(BINDIR)
-	$(RUSTC) -o '$(BINDIR)/demo' -L '$(LIBDIR)' src/demo/main.rs
+compile_demo: src/demo/main.rs src/demo/video.rs $(BUILD_TMPDIR)/libsdl2.dummy | $(BINDIR)
+	$(RUSTC) -o '$(BINDIR)/demo' -L '$(SDL_LIBDIR)' -L '$(LIBDIR)' src/demo/main.rs
 
 demo: compile_demo
 	'$(BINDIR)/demo'

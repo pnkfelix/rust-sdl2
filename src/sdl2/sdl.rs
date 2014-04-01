@@ -85,9 +85,15 @@ pub enum Error {
 
 pub type SdlResult<T> = Result<T, String>;
 
-pub fn init(flags: InitFlag) -> bool {
-    unsafe {
+
+pub fn init(flags: InitFlag) -> SdlResult<()> {
+    let result = unsafe {
         ll::SDL_Init(flags.bits()) == 0
+    };
+    if result {
+        Ok(())
+    } else {
+        Err(get_error())
     }
 }
 
