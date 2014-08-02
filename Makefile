@@ -8,7 +8,6 @@ LIBDIR = $(OUTDIR)/lib
 BUILD_TMPDIR = $(OUTDIR)/tmp
 
 SDL_LIBDIR = $(shell sdl2-config --prefix)/lib
-# $(info SDL_LIBDIR,$(SDL_LIBDIR))
 
 RUST_SRC = $(shell find src/. -type f -name '*.rs') \
 	src/sdl2/generated/keycode.rs                   \
@@ -16,6 +15,9 @@ RUST_SRC = $(shell find src/. -type f -name '*.rs') \
 
 .PHONY: all gen-lib
 all: $(BUILD_TMPDIR)/libsdl2.dummy
+
+sdl_native_libs:
+	cp -r $(SDL_LIBDIR)/* $$OUT_DIR
 
 UNAME=$(shell uname)
 

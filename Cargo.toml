@@ -3,7 +3,7 @@
 name    = "sdl2"
 version = "0.0.1"
 authors = [ "Tony Aldridge<zaragopha@hotmail.com>" ]
-build   = "make src/sdl2/generated/keycode.rs src/sdl2/generated/scancode.rs"
+build   = "make src/sdl2/generated/keycode.rs src/sdl2/generated/scancode.rs sdl_native_libs"
 
 [[lib]]
 
